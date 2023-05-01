@@ -8,6 +8,13 @@ use Illuminate\Http\Request;
 class CompanyTypeMovementInventoryController extends ApiController
 {
 
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('MonologMiddleware');
+
+    }
+    
     public function index(Request $request, Company $company)
     {
         $typemovementinventory = $company->shops()

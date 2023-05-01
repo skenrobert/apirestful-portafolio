@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Room;
-// use App\Models\Image;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Mail\RoomsMail;
@@ -12,10 +12,11 @@ use Illuminate\Support\Facades\Mail;
 class RoomController extends ApiController
 {
 
-      
     public function __construct()//TODO: se deshabilita para probar el json
     {
-        // $this->middleware('auth:api');
+        // $this->middleware('auth.basic',['only'=>['show']]);
+        $this->middleware('auth');
+        // $this->middleware('MonologMiddleware:'.\Auth::user());
         // parent::__construct();
         // $this->middleware('transform.input:'. UserTransformer::class)->only(['store', 'update']);
     }
@@ -29,31 +30,19 @@ class RoomController extends ApiController
 
     public function store(Request $request)
     {
-
-        // if ($request->file('image')) {
-        //     $file = $request->file('image');
-        //     $name = 'room_'.time() . '.' . $file->getClientOriginalExtension();
-        //     $path = public_path() . '\images\img_app\room';
-        //     $file->move($path, $name);
-  
-        //   }
-
           $room = Room::create($request->all());
 
-        //   $image = new Image();
-        //   $image->name = $name;
-        //   $image->save();
-
-        //   $image->room()->attach($room->id);
+          $this->log($request->ip() , "Room", "Ver", "el usuario Nº". $request->user()->id . " de email " . $request->user()->id . " realizo esta acción en el ". "room" ." de id ".$room->id , php_uname($_SERVER['REMOTE_ADDR']) );
        
           $data = ['data'=>$room];
           return $this->showOne($data);
     }
 
-    public function show(Room $room)
+    public function show( Room $room)
     {
-        // $room->images;
-
+      
+         $this->log($request->ip() , "Room", "Ver", "el usuario Nº". $request->user()->id . " de email " . $request->user()->id . " realizo esta acción en el ". "room" ." de id ".$room->id , php_uname($_SERVER['REMOTE_ADDR']) );
+  
         $data = ['data'=>$room];
         return $this->showOne($data);
     }
@@ -61,31 +50,14 @@ class RoomController extends ApiController
     public function update(Request $request, Room $room)
     {
 
-        // if ($request->file('image')) {
-        //     $file = $request->file('image');
-        //     $name = 'room_'.time() . '.' . $file->getClientOriginalExtension();
-        //     $path = public_path() . '\images\img_app\room';
-        //     $file->move($path, $name);
-  
-        //     $image = new Image();
-        //     $image->name = $name;
-        //     $image->save();
-  
-        //   //   $image->room()->attach($room->id);
-        //   //   $image->room()->syncWithoutDetaching($room->id);
-        //   //   $image->room()->detach($room->id);
-        //     $image->room()->sync($room->id);
-            
-        //   }
-
-        // foreach ($room->images as $image) {
-        //     $image->room()->detach($room->id);
-
+        // if($request->has('login_id')){
+        //     $user = User::find($request->login_id);
+        //      $this->log($request->ip() , "Room", "Actualizar", "el usuario Nº ". $user->id . " de nombre " . $user->person->name . " realizo esta acción en el ". "room" ." de id ".$room->id , php_uname($_SERVER['REMOTE_ADDR']) );
         // }
-
 
           $room->fill($request->all())->save();
 
+         $this->log($request->ip() , "Room", "Ver", "el usuario Nº". $request->user()->id . " de email " . $request->user()->id . " realizo esta acción en el ". "room" ." de id ".$room->id , php_uname($_SERVER['REMOTE_ADDR']) );
 
           $data = ['data'=>$room];
           return $this->showOne($data);
@@ -93,7 +65,14 @@ class RoomController extends ApiController
 
     public function destroy(Room $room)
     {
+        // if($request->has('login_id')){
+        //     $user = User::find($request->login_id);
+        //      $this->log($request->ip() , "Room", "Eliminar", "el usuario Nº ". $user->id . " de nombre " . $user->person->name . " realizo esta acción en el ". "room" ." de id ".$room->id , php_uname($_SERVER['REMOTE_ADDR']) );
+        // }
+
         $room->delete($room);
+
+        $this->log($request->ip() , "Room", "Ver", "el usuario Nº". $request->user()->id . " de email " . $request->user()->id . " realizo esta acción en el ". "room" ." de id ".$room->id , php_uname($_SERVER['REMOTE_ADDR']) );
         return $this->showOne($room);
     }
 

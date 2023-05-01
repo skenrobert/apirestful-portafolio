@@ -8,6 +8,13 @@ use App\Models\Item;
 
 class CompanyItemController extends ApiController
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('MonologMiddleware');
+
+    }
+    
     public function index(Company $company)
     {
         $items = $company->items()

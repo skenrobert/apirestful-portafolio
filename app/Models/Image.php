@@ -58,4 +58,9 @@ class Image extends Model
     {
         return $this->belongsToMany('App\Models\Audiovisual');//->withTimestamps();
     }
+
+    public function contract()
+    {
+        return $this->belongsToMany('App\Models\Contract');//->withTimestamps();
+    }
 }

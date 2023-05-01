@@ -17,6 +17,13 @@ use Carbon\Carbon;
 class ProductionDetailsConnecController extends ApiController
 {
    
+    public function __construct()
+    {
+        // $this->middleware('auth:api');
+        // $this->middleware('MonologMiddleware');
+
+    }
+    
     public function index()
     {
         // $breadcrumbs = [
@@ -56,13 +63,15 @@ class ProductionDetailsConnecController extends ApiController
         //para pruebas
         // $shifthasplanning = ShiftHasPlanning::orderBy('id','DESC')->where('company_id','=',$request->company_id)->where('beginning_week','=',$knownDate->format('Y-m-d'))->get()->pluck('id')->toArray();
 
+
+
         if(empty($shifthasplanning))
         {
             return $this->errorResponse("No Hay Planificación de la Semana en Curso No Puede Guardar Una Conexión",404);
         }
 
         $id = $shifthasplanning[0];
-
+        
         $array = array( 1 => 'Monday', 2 => 'Tuesday', 3 => 'Wednesday', 4 => 'Thursday', 5 => 'Friday', 6 => 'Saturday', 7 => 'Sunday');
 
         $date = Carbon::now();
@@ -73,8 +82,8 @@ class ProductionDetailsConnecController extends ApiController
 
         $productiondetailsshift = $shifthasplanning->production_master()
         // ->whereHas('productiondetailsdays')
-        ->with('productiondetailsdays.productiondetailsshift.monitorshift.shift')
-        ->with('productiondetailsdays.productiondetailsshift.monitorshift.monitor.person')
+        // ->with('productiondetailsdays.productiondetailsshift.monitor_shift.shift')
+        ->with('productiondetailsdays.productiondetailsshift.monitor_shift.monitor.person')
         // // ->with('site')
         // ->with('commission')
         ->orderBy('id','DESC')
@@ -84,14 +93,12 @@ class ProductionDetailsConnecController extends ApiController
         ->where('day_week','=', $clave)
         ->pluck('productiondetailsshift')
         ->collapse()
-        ->where('monitorshift.monitor_id','=', $request->monitor_id)
+        ->where('monitor_shift.monitor_id','=', $request->monitor_id)
 
         ->pluck('id')
 
         ->unique()
         ->values();
-
-        // dd($productiondetailsshift[0]);
 
         $productiondetailsconnec = new ProductionDetailsConnec();
         
@@ -106,8 +113,8 @@ class ProductionDetailsConnecController extends ApiController
 
         $productiondetailsconnec->save();
 
+        $shift = $productiondetailsconnec->production_details_shift->monitor_shift->shift;
 
-        $shift = $productiondetailsconnec->production_details_shift->monitorshift->shift;
 
                 if($shift->id == 1){
                                         

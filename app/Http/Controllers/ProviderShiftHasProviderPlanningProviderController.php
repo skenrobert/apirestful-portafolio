@@ -16,6 +16,13 @@ use Illuminate\Http\Request;
 class ProviderShiftHasProviderPlanningProviderController extends ApiController
 {
    
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('MonologMiddleware');
+
+    }
+    
     public function store(Request $request, Provider $provider, ShiftHasProvider $shifthasprovider)
     {
         return DB::transaction(function() use ($request, $provider, $shifthasprovider){

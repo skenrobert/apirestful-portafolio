@@ -15,6 +15,12 @@ use Illuminate\Http\Request;
 
 class EmployeeShiftHasEmployeeMonitorShiftController extends ApiController
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('MonologMiddleware');
+
+    }
    
     public function store(Request $request, Employee $employee, ShiftHasEmployee $shifthasemployee)
     {

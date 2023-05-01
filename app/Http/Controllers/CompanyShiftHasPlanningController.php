@@ -12,11 +12,11 @@ use Illuminate\Http\Request;
 class CompanyShiftHasPlanningController extends ApiController
 {
    
-    public function __construct()//TODO: se deshabilita para probar el json
+    public function __construct()
     {
         $this->middleware('auth:api');
-        // parent::__construct();
-        // $this->middleware('transform.input:'. UserTransformer::class)->only(['store', 'update']);
+        $this->middleware('MonologMiddleware');
+
     }
 
 

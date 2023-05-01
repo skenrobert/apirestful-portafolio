@@ -16,20 +16,26 @@ use Barryvdh\DomPDF\Facade as PDF;
 
 class AccountReceiptModelController extends ApiController
 {
+    public function __construct()
+    {
+        // $this->middleware('auth:api');
+        // $this->middleware('MonologMiddleware');
+    }
+    
     public function index()
     {
-        // $breadcrumbs = [
-        //     ['link'=>"dashboard-analytics",'name'=>"Home"], ['name'=>"Lista de AccountReceiptModel"]
-        // ];
+        $breadcrumbs = [
+            ['link'=>"dashboard-analytics",'name'=>"Home"], ['name'=>"Lista de AccountReceiptModel"]
+        ];
 
-        // // $accountreceiptmodels = AccountReceiptModel::orderBy('id','DESC');   
-        // // $accountreceiptmodels = AccountReceiptModel::orderBy('id','ASC')->pluck('number', 'location', 'id');
-        // $accountreceiptmodels= AccountReceiptModel::orderBy('id','DESC')->get();
+            $accountreceiptmodels= AccountReceiptModel::orderBy('id','DESC')->get();
           
-        // $data = ['data'=>$accountreceiptmodels, 'breadcrumbs'=> $breadcrumbs];
-        // return $this->showAll($data);
+        $data = ['data'=>$accountreceiptmodels, 'breadcrumbs'=> $breadcrumbs];
+        return $this->showAll($data);
 
     }
+
+    // public function show(Request $request) 
 
     public function store(Request $request) 
     {
@@ -67,37 +73,37 @@ class AccountReceiptModelController extends ApiController
 
                         $accountreceiptmodel = new AccountReceiptModel();
 
-                        if ($bulkload->document_number != null) {//TEST
+                        // if ($bulkload->document_number != null) {//TEST descomenta si no es prueba
 
-                            $trozos = explode("-", $bulkload->document_number);
+                        //     $trozos = explode("-", $bulkload->document_number);
 
-                            if(Person::find($trozos[0])){
+                        //     if(Person::where('document_number','=', $trozos[0])->get()){
 
-                                $person = Person::orderBy('id','DESC')->where('document_number','=', $trozos[0])->get();
+                        //         $person = Person::orderBy('id','DESC')->where('document_number','=', $trozos[0])->get();
 
-                                $accountreceiptmodel->document_number = $person->document_number;
-                                $accountreceiptmodel->bank_number = $person->bank_account;
-                                $accountreceiptmodel->name = $person->name.' '.$person->last_name ;
-                                $accountreceiptmodel->user_id = $person->user->id;
-                                $accountreceiptmodel->accounting_id = $accounting->id;
+                        //         $accountreceiptmodel->document_number = $person->document_number;
+                        //         $accountreceiptmodel->bank_number = $person->bank_account;
+                        //         $accountreceiptmodel->name = $person->name.' '.$person->last_name ;
+                        //         $accountreceiptmodel->user_id = $person->user->id;
+                        //         $accountreceiptmodel->accounting_id = $accounting->id;
 
-                            }elseif(isset($trozos[1])){
+                        //     }elseif(isset($trozos[1])){
 
-                                $person = Person::orderBy('id','DESC')->where('document_number','=', $trozos[1])->get();
+                        //         $person = Person::orderBy('id','DESC')->where('document_number','=', $trozos[1])->get();
 
-                                $accountreceiptmodel->document_number = $person->document_number;
-                                $accountreceiptmodel->bank_number = $person->bank_account;
-                                $accountreceiptmodel->name = $person->name.' '.$person->last_name ;
-                                $accountreceiptmodel->user_id = $person->user->id;
-                                $accountreceiptmodel->accounting_id = $accounting->id;
+                        //         $accountreceiptmodel->document_number = $person->document_number;
+                        //         $accountreceiptmodel->bank_number = $person->bank_account;
+                        //         $accountreceiptmodel->name = $person->name.' '.$person->last_name ;
+                        //         $accountreceiptmodel->user_id = $person->user->id;
+                        //         $accountreceiptmodel->accounting_id = $accounting->id;
 
-                            }else{
+                        //     }else{
 
-                                    return response()->json(['error' => 'Se debe Registra la Modelo con C.C. '.$bulkload->document_number.' Nombre '.$bulkload->name,
-                                    'code' => 422], 422);
-                            }
+                        //             return response()->json(['error' => 'Se debe Registra la Modelo con C.C. '.$bulkload->document_number.' Nombre '.$bulkload->name,
+                        //             'code' => 422], 422);
+                        //     }
 
-                        }
+                        // }
 
                         
                         if($request->has('observation')){

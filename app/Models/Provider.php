@@ -183,5 +183,11 @@ public function images()
     
       }
 
+      
+    public function accountreceiptprovider()//1 a m
+    {
+        return $this->hasMany('App\Models\AccountReceiptProvider');
+    }
+
 }
 

@@ -30,12 +30,12 @@ class DatabaseSeeder extends Seeder
         $this->call(SitesSeeder::class);
         $this->call(JobTypeSeeder::class);
 
+        $this->call(BankSeeder::class);
         $this->call(PeopleSeeder::class);
         $this->call(LockerSeeder::class);
         $this->call(AccountSeeder::class);
         $this->call(AudiovisualSeeder::class);
         $this->call(EventSeeder::class);
-        $this->call(BankSeeder::class);
         $this->call(EpsSeeder::class);
         // $this->call(ShiftHasEmployeesSeeder::class);
         // $this->call(ShiftHasProviderSeeder::class);
@@ -99,8 +99,13 @@ class DatabaseSeeder extends Seeder
         $this->call(ArticleSeeder::class);
 
         $this->call(SaleInvoiceSeeder::class);
+        $this->call(ComissionEmployeeSeeder::class);
+        $this->call(ComissionModelSeeder::class);
+        $this->call(ComissionStudySeeder::class);
+        $this->call(AccountReceiptProviderSeeder::class);
 
-
+        $this->call(ContractSeeder::class);
+        
     }
 
     protected function truncateTable(array $tables)

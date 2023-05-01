@@ -12,6 +12,7 @@ class AccountController extends ApiController
     public function __construct()//TODO: se deshabilita para probar el json
     {
         $this->middleware('auth');
+        $this->middleware('MonologMiddleware');
         // parent::__construct();
         // $this->middleware('transform.input:'. UserTransformer::class)->only(['store', 'update']);
     }

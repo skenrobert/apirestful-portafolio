@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use App\Events\EventCreated;
+
+
 class PagesController extends Controller
 {
     // Return Rooms View
@@ -11,8 +14,10 @@ class PagesController extends Controller
     public function __construct()//TODO: se deshabilita para probar el json
     {
         $this->middleware('auth');
-        // parent::__construct();
-        // $this->middleware('transform.input:'. UserTransformer::class)->only(['store', 'update']);
+        // $this->middleware('roleshinobi:manager');//sub-study
+        // $this->middleware('roleshinobi:sub-study');//sub-study
+
+
     }
 
     // Return Account View
@@ -25,6 +30,12 @@ class PagesController extends Controller
     {
         return view('/pages/app-account-request');
     }
+    // Return Boutique View
+    public function boutique_list()
+    {
+        return view('/pages/app-boutique-list');
+    }
+
     // Return Categories View
     public function category_list()
     {
@@ -106,7 +117,17 @@ class PagesController extends Controller
     }
     
     
-  
+      // 
+    public function listenBroadcast()
+    {
+        return view('/pages/listenBroadcast');
+    }
+
+    public function event()
+    {
+        event(new EventCreated(\Auth::user()->id, \Auth::user()->totalEvents(\Auth::user()->id)));
+    }
+
 
 
 }

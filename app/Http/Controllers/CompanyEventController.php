@@ -10,6 +10,13 @@ use Illuminate\Support\Facades\DB;
 
 class CompanyEventController extends ApiController
 {
+    public function __construct()
+    {
+        // $this->middleware('auth:api');
+        // $this->middleware('MonologMiddleware');
+
+    }
+    
     public function index(Company $company)
     {
 
@@ -31,6 +38,11 @@ class CompanyEventController extends ApiController
 
     public function show(Request $request, Company $company, $id)
     {
+
+        //auth()->guard('api')->user()
+      //  auth('api')->user()
+
+        dd(auth('api')->user());
         $users= User::where('id','=',$id)->get();
 
                     foreach ($users as $user) {// m a n

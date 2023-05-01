@@ -30,13 +30,15 @@ class UserController extends ApiController{
     use Notifiable;
     // use Notification;
 
-    // public function __construct()//TODO: se deshabilita para probar el json
-    // {
+    public function __construct()
+    {
+        $this->middleware('MonologMiddleware');
+
     //     $this->middleware('auth');
     //     // parent::__construct();
     //     // $this->middleware('transform.input:'. UserTransformer::class)->only(['store', 'update']);
 
-    // }
+    }
 
 //TODO: Quitarle el nombre de usuario
 
@@ -244,25 +246,25 @@ class UserController extends ApiController{
         ]);
     }
   
-      // User Profile Page
-    public function user_profile(){
-        $breadcrumbs = [
-            ['name'=>"Perfil"]
-        ];
-        return view('/pages/app-profile', [
-            'breadcrumbs' => $breadcrumbs
-        ]);
-    }
+    //   // User Profile Page
+    // public function user_profile(){
+    //     $breadcrumbs = [
+    //         ['name'=>"Perfil"]
+    //     ];
+    //     return view('/pages/app-profile', [
+    //         'breadcrumbs' => $breadcrumbs
+    //     ]);
+    // }
 
-    // Account Settings
-    public function user_settings(){
-      $breadcrumbs = [
-          ['link'=>"profile",'name'=>"Perfil"], ['name'=>"Configuración"]
-      ];
-      return view('/pages/app-settings', [
-          'breadcrumbs' => $breadcrumbs
-      ]);
-    }
+    // // Account Settings
+    // public function user_settings(){
+    //   $breadcrumbs = [
+    //       ['link'=>"profile",'name'=>"Perfil"], ['name'=>"Configuración"]
+    //   ];
+    //   return view('/pages/app-settings', [
+    //       'breadcrumbs' => $breadcrumbs
+    //   ]);
+    // }
 
     
     public function totalEvents($user_id) {

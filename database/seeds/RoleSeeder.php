@@ -49,7 +49,19 @@ class RoleSeeder extends Seeder
         $slug[9]= 'study';
         $description[9]= 'Rol de Estudio';     
  
-        for ($i=1;$i<=9; $i++){
+        $name[10]= 'Sub-Estudio 80%';
+        $slug[10]= 'sub-study80';
+        $description[10]= 'Rol de Sub-Estudio'; 
+
+        $name[11]= 'RRHH';
+        $slug[11]= 'rrhh';
+        $description[11]= 'Rol de Talento Humano'; 
+
+        $name[12]= 'Soporte';
+        $slug[12]= 'soporte';
+        $description[12]= 'Rol de Soporte'; 
+
+        for ($i=1;$i<=12; $i++){
         
             DB::table('roles')->insert([
 

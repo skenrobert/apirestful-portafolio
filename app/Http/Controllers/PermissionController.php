@@ -10,7 +10,9 @@ class PermissionController extends ApiController{
     
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth:api');
+        $this->middleware('MonologMiddleware');
+
     }
 
 

@@ -8,6 +8,12 @@ use Illuminate\Http\Request;
 
 class BoutiqueController extends ApiController
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('MonologMiddleware');
+    }
+    
     // public function index()
     // {
     //     // $breadcrumbs = [
@@ -80,14 +86,14 @@ class BoutiqueController extends ApiController
     public function updateImage(Request $request, Boutique $boutique)//Request $request
     {
 
-        $image = Image::find($request->image_id);
+        $image = Boutique::find($request->image_id);
 
         if ($request->file('image')) {
 
-            // foreach ($boutique->images as $image) {
-            //     $image->boutique()->detach($boutique->id);
+            foreach ($boutique->images as $image) {
+                $image->boutique()->detach($boutique->id);
     
-            // }
+            }
 
             $image_path = public_path().'/images/img_app/boutique/'.$image->name;
             unlink($image_path);

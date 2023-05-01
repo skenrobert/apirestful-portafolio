@@ -9,7 +9,13 @@ use Illuminate\Http\Request;
 
 class ProviderwithoutRoomController extends ApiController
 {
-   
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('MonologMiddleware');
+
+    }
+    
     public function index(Request $request, $id)
     {
         $company= Company::find($id);

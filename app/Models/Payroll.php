@@ -26,13 +26,17 @@ class Payroll extends Model
     protected $dates = ['deleted_at'];
 
     protected $fillable = [
-        'Observation',
+       
+        'observation',
         'beginning',
         'end',
-        'assistance_controls_id',
-        'company_id',
+        'total',
         'number_control',
-        'employee_id'
+        'transport_aid',
+        'food_aid',
+        'additional_transport_assistance',
+        'assistancecontrol_id',
+        'company_id'
     ];
 
 

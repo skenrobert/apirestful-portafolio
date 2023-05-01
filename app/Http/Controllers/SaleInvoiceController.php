@@ -11,11 +11,13 @@ use Barryvdh\DomPDF\Facade as PDF;
 class SaleInvoiceController extends ApiController
 {
     
+    
     public function __construct()
     {
-        // $this->middleware('auth:api');
+        $this->middleware('auth:api');
+        $this->middleware('MonologMiddleware');
+
     }
-   
     // public function index()
     // {
     //     // $saleinvoices= SaleInvoice::orderBy('id','DESC')->get();

@@ -7,6 +7,13 @@ use Illuminate\Http\Request;
 
 class EmployeeController extends ApiController
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('MonologMiddleware');
+
+    }
+    
     public function index()
     {
         // $breadcrumbs = [
@@ -66,18 +73,18 @@ class EmployeeController extends ApiController
         return $this->showOne($employee);
     }
 
-    // Return Employee View
+    // // Return Employee View
  
-    public function employee_list(Employee $employee)
-    {
-        $breadcrumbs = [
-            ['link'=>"dashboard",'name'=>"Inicio"], ['name'=>"Todas los Empleados"]
-        ];
+    // public function employee_list(Employee $employee)
+    // {
+    //     $breadcrumbs = [
+    //         ['link'=>"dashboard",'name'=>"Inicio"], ['name'=>"Todas los Empleados"]
+    //     ];
 
-        return view('/pages/app-employee-list', [
-            'breadcrumbs' => $breadcrumbs
-        ]);
-    }
+    //     return view('/pages/app-employee-list', [
+    //         'breadcrumbs' => $breadcrumbs
+    //     ]);
+    // }
 
 
     //******************************************************************************************* */

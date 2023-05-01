@@ -9,6 +9,13 @@ use Illuminate\Http\Request;
 
 class CompanyProviderController extends ApiController
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('MonologMiddleware');
+
+    }
+    
     
     public function index(Company $company)
     {

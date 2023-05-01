@@ -51,6 +51,16 @@ class Company extends Model
     return $this->hasMany('App\Models\User');
   }
 
+  public function contract()// 1 a 1
+  {
+    return $this->hasMany('App\Models\Contract');
+  }
+
+  public function polls()// 1 a 1
+  {
+    return $this->hasMany('App\Models\Poll');
+  }
+
   public function payroll()// 1 a 1
   {
     return $this->hasMany('App\Models\Payroll');
@@ -223,6 +233,16 @@ public function billtopay()//m a n
     return $this->belongsToMany('App\Models\BillToPay');
 }
 
+public function accountreceiptproviders()// 1 a 1
+{
+
+  return $this->hasMany('App\Models\AccountReceiptProvider');
+}
+
+public function comissionstudies()//1 a m
+{
+    return $this->hasMany('App\Models\ComissionStudy');
+}
 
 }
 

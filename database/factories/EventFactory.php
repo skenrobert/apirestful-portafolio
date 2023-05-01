@@ -29,7 +29,7 @@ $factory->define(Event::class, function (Faker $faker) {
         'observation' => $faker->realText($maxNbChars = 200, $indexSize = 2),
         'processed' => $faker->randomElement($array = array (0, 1)),
         'value_real' => $faker->randomElement($array = array (100, 10000)),
-        'event_type_id' => 1,
+        'event_type_id' => $faker->randomElement($event_types),
         'user_id' => $faker->randomElement($users),    
         'model_id' => $faker->randomElement($users),    
         'create_event_id' => $faker->randomElement($users),    

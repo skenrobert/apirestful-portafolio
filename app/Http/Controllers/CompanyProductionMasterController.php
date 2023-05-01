@@ -7,6 +7,13 @@ use Illuminate\Http\Request;
 
 class CompanyProductionMasterController extends ApiController
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('MonologMiddleware');
+
+    }
+    
     public function index(Company $company)
     {
         $productionmaster = $company->productionmaster()

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Events\EventCreated;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -35,7 +37,24 @@ class Event extends Model
     //     return $this->belongsTo('App\Models\Employee');
 
     // }
+//*************************************************************** */
 
+    // protected $dispatchesEvents = [
+    //     'created' => EventCreated::class
+    // ];
+
+    // public static function boot(){
+    //     parent::boot();
+
+    //     static::created(function($event){
+    //         dd('From bott method', $event);
+    //     });
+
+    //     static::updated(function($event){
+    //         dd('From bott method', $event);
+    //     });
+    // }
+//**************************************************************** */
     public function company()//n a 1
     {
         return $this->belongsTo('App\Models\Company');
@@ -107,6 +126,20 @@ class Event extends Model
         return $this->hasMany('App\Models\ReceiptPayment');
     }
 
+    public function comissionemployees() //1 a m
+    {
+        return $this->hasMany('App\Models\ComissionEmployee');
+    }
+
+    public function comissionmodels() //1 a m
+    {
+        return $this->hasMany('App\Models\ComissionModel');
+    }
+
+    public function comissionstudies() //1 a m
+    {
+        return $this->hasMany('App\Models\ComissionStudy');
+    }
     // public function productionmasters() //1 a m
     // {
     //     return $this->belongsTo('App\Models\ProductionMaster');
@@ -116,4 +149,10 @@ class Event extends Model
 
         return $this->belongsTo('App\Models\Audiovisual');
    } 
+
+   public function accountreceiptprovider()//1 a m
+   {
+       return $this->hasMany('App\Models\AccountReceiptProvider');
+   }
+
 }

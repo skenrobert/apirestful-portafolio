@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\User;
 use App\Models\Payroll;
-use App\Models\ReceiptPayment;
+use App\Models\ComissionEmployee;
+use App\Models\ComissionModel;
+use App\Models\ComissionStudy;
 use Illuminate\Http\Request;
 use App\Models\ProductionMaster;
 use App\Models\Commission;
@@ -20,13 +22,16 @@ use App\Models\BillToCharge;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NotificationUser;//este es el notification de usuario
 
+
 class EventController extends ApiController
 {
 
     public function __construct()
     {
-        $this->middleware('auth:api');
+        // $this->middleware('MonologMiddleware');
+        // $this->middleware('auth:api');
     }
+
 
     // public function index()
     // {
@@ -118,24 +123,36 @@ class EventController extends ApiController
 
     }
 
-    public function show(Event $event)
+    public function show(Request $request, Event $event)
     {
         // if($event->read_at == null){
         //     $event->read_at = now();
         //     $event->save();
         // }
+
+        // dd($request->user()->hasRole($role));
    
         $event->productiondetailsconnec;
         $event->payroll;
         $event->provider;
         $event->auditshift;
         $event->audits;
-        $event->model->person;
-        $event->user->person;
+
+        if($event->model){
+
+            $event->model->person;
+        }
+
+        if($event->user){
+
+            $event->user->person;
+        }
+
         $event->payroll;
         $event->company;
+        $event->create_event->person;
 
-        $data = ['data'=>$event];
+        $data = ['data'=>$event, 'data1'=> \Auth::user()];
         return $this->showOne($data);
     }
 
@@ -188,12 +205,7 @@ class EventController extends ApiController
         $shifthasplanning->status = 'Ejecutada';
         $shifthasplanning->save();
 
-        $event = new Event();// entre produccion se debe hacer una tabla muchos a muchos para el calculo de nomina quicenal estaria asociada a 2 producciones maestra de semana
-        $event->processed = 1;
-        $event->productionmaster_id = $productionmaster->id;
-        $event->observation = 'Ejecutada la planificación';
-        $event->event_type_id = 5;
-        $event->save();
+ 
 
         $productiondetailsconnecs = $productionmaster->productiondetailsdays()
     //    ->whereHas('productiondetailsdays')
@@ -259,11 +271,11 @@ class EventController extends ApiController
 
         foreach($monitorshifts as $monitorshift){
             $totalmodelos = $monitorshift->planningprovider->count() * 0.9;
+            // dd($totalmodelos = $monitorshift->planningprovider->count() * 0.9);
 
                 foreach($monitorshift->planningprovider as $planningprovider){
                     // dd($monitorshift->planningprovider->count());
                     // dd($planningprovider->count());
-                    // foreach($productiondetailsconnecs as $productiondetailsconnec){
                                             if($planningprovider->production_total_dollar >= $planningprovider->goal_dollar){
                                                 $mayor += 1;
                                             }else {
@@ -272,18 +284,18 @@ class EventController extends ApiController
                                             }
 
                         }
-                    // dd($totalmodelos . $mayor .$menoralameta );
+                    // dd($totalmodelos * 0.9 . $mayor  .$menoralameta );
 //                              2.7       1            2
                 if($totalmodelos >= $mayor){
                     $monitorshift->commission_payment90 = 1;
                     $monitorshift->save();
                 } else {
-                    // dd('aqui');
                     $monitorshift->commission_payment90 = 0;
                     $monitorshift->save();
                 }
 
                     $mayor = 0;
+                    $menoralameta = 0;
         }
 
         $data = ['data'=>$monitorshifts];
@@ -336,7 +348,7 @@ class EventController extends ApiController
                         foreach($monitorshifts as $monitorshift){
                             foreach($monitorshiftsprevious as $monitorshiftspreviou){
 
-                                    $monitorshift->planningprovider->sum('production_total_dollar');
+                                    // $monitorshift->planningprovider->sum('production_total_dollar');
                                         //33888.0
                                     if( $monitorshift->monitor_id ==  $monitorshiftspreviou->monitor_id){
                                         // dd( $monitorshiftspreviou->planningprovider->sum('production_total_dollar'));
@@ -357,8 +369,8 @@ class EventController extends ApiController
                     }
         } else {
 
-                $monitorshift->commission_payment10 = 1;
-                $monitorshift->save();
+                // $monitorshift->commission_payment10 = 1;
+                // $monitorshift->save();
 
         }
 
@@ -375,6 +387,9 @@ class EventController extends ApiController
         $this->commissionCalculation10($id);
         
         $productionmaster = ProductionMaster::findOrFail($id);
+        $productionmaster->closed = 1;//cierra la planificacion tambien
+        $productionmaster->save();
+        
         $commission = Commission::first();
 
         $monitorshifts = $productionmaster->shift_has_planning()
@@ -395,106 +410,91 @@ class EventController extends ApiController
            $event->event_type_id = 6;
            $event->save();
 
-           $jobtype = JobType::findOrFail(1);
+           $accounting = new Accounting();
+           $accounting->name = 'Calculo para el pago de Comisiones Monitores';
+           // $accounting->payroll_id = $payroll->id;
+           $accounting->company_id = $productionmaster->company_id;
+           $accounting->save();
            
+
 
            foreach($monitorshifts as $monitorshift){
 
-                if($monitorshift->commission_payment90 == 1 and $monitorshift->commission_payment90 == 1){
+                if($monitorshift->commission_payment90 == 1 and $monitorshift->commission_payment10 == 1){
 
-                            // se paga el 1.5
-                        $receiptpayment = new ReceiptPayment();
-                        $receiptpayment->event_id = $event->id;
-                        $receiptpayment->pay_salary = $jobtype->salary / 4;//definir si las comisiones deben ser quinsenal
-                        $receiptpayment->user_id = $monitorshift->user_id;
-                        $receiptpayment->paycommission = $monitorshift->planningprovider->sum('production_total_dollar') * $commission->percentage3;
-                        $receiptpayment->production = $monitorshift->planningprovider->sum('production_total_dollar');
-                        $receiptpayment->commission = $commission->percentage3;
-                        $receiptpayment->save();
+                    $comissionemployee = new ComissionEmployee();
+                    $comissionemployee->observation = 'cumplio con las 2 premisas para premio la del 90% y la del 10%';
+                    $comissionemployee->production = $monitorshift->planningprovider->sum('production_total_dollar');
+                    $comissionemployee->commission = $commission->percentage3;
+                    $comissionemployee->paycommission = $monitorshift->planningprovider->sum('production_total_dollar') * $commission->percentage3;
+                    $comissionemployee->event_id = $event->id;
+                    $comissionemployee->user_id = $monitorshift->user_id;
+                    $comissionemployee->save();
+                    
+                    // // se paga el 1.5
+                    //     $receiptpayment = new ReceiptPayment();
+                    //     $receiptpayment->event_id = $event->id;
+                    //     $receiptpayment->pay_salary = $jobtype->salary / 4;//definir si las comisiones deben ser quinsenal
+                    //     $receiptpayment->user_id = 
+                    //     $receiptpayment->paycommission = 
+                    //     $receiptpayment->production = 
+                    //     $receiptpayment->commission = 
+                    //     $receiptpayment->save();
 
-                }else if($monitorshift->commission_payment90 == 1 or $monitorshift->commission_payment90 == 1){
+                }else if($monitorshift->commission_payment90 == 1 or $monitorshift->commission_payment10 == 1){
                         // se paga el 1
 
-                        $receiptpayment = new ReceiptPayment();
-                        $receiptpayment->event_id = $event->id;
-                        $receiptpayment->pay_salary = $jobtype->salary / 4;//definir si las comisiones deben ser quinsenal
-                        $receiptpayment->user_id = $monitorshift->user_id;
-                        $receiptpayment->paycommission = $monitorshift->planningprovider->sum('production_total_dollar') * $commission->percentage2;
-                        $receiptpayment->production = $monitorshift->planningprovider->sum('production_total_dollar');
-                        $receiptpayment->commission = $commission->percentage2;
-                        $receiptpayment->save();
-                       
-                }else {
-                    // se paga la 
+                        $comissionemployee = new ComissionEmployee();
+                        $comissionemployee->observation = 'cumplio con las 1 premisas para premio';
+                        $comissionemployee->production = $monitorshift->planningprovider->sum('production_total_dollar');
+                        $comissionemployee->commission = $commission->percentage2;
+                        $comissionemployee->paycommission = $monitorshift->planningprovider->sum('production_total_dollar') * $commission->percentage2;
+                        $comissionemployee->event_id = $event->id;
+                        $comissionemployee->user_id = $monitorshift->user_id;
+                        $comissionemployee->save();
 
-                    $receiptpayment = new ReceiptPayment();
-                    $receiptpayment->event_id = $event->id;
-                    $receiptpayment->pay_salary = $jobtype->salary / 4;//definir si las comisiones deben ser quinsenal
-                    $receiptpayment->user_id = $monitorshift->user_id;
-                    $receiptpayment->paycommission = $monitorshift->planningprovider->sum('production_total_dollar');
-                    $receiptpayment->production = $monitorshift->planningprovider->sum('production_total_dollar');
-                    $receiptpayment->commission = 0;
-                    $receiptpayment->save();
+                        // $receiptpayment = new ReceiptPayment();
+                        // $receiptpayment->event_id = $event->id;
+                        // $receiptpayment->pay_salary = $jobtype->salary / 4;//definir si las comisiones deben ser quinsenal
+                        // $receiptpayment->user_id = $monitorshift->user_id;
+                        // $receiptpayment->paycommission = $monitorshift->planningprovider->sum('production_total_dollar') * $commission->percentage2;
+                        // $receiptpayment->production = $monitorshift->planningprovider->sum('production_total_dollar');
+                        // $receiptpayment->commission = 
+                        // $receiptpayment->save();
+                       
+                // }else {
+                //     // se paga la 
+
+                //     $receiptpayment = new ReceiptPayment();
+                //     $receiptpayment->event_id = $event->id;
+                //     $receiptpayment->pay_salary = $jobtype->salary / 4;//definir si las comisiones deben ser quinsenal
+                //     $receiptpayment->user_id = $monitorshift->user_id;
+                //     $receiptpayment->paycommission = $monitorshift->planningprovider->sum('production_total_dollar');
+                //     $receiptpayment->production = $monitorshift->planningprovider->sum('production_total_dollar');
+                //     $receiptpayment->commission = 0;
+                //     $receiptpayment->save();
 
                 }
                 
 
            }
 
+           $billtopay = new BillToPay();
+           $billtopay->description = $event->observation;
+         //  $billtopay->way_to_pay = $request->way_to_pay;
+           // $billtopay->transfer_code = $request->transfer_code;
+           // $billtopay->quantity = $request->quantity;
+           $billtopay->total_cost =  $comissionemployee->paycommission;
+           //$billtopay->total_paid = $request->paid;
+           $billtopay->accounting_id = $accounting->id;
+           $billtopay->event_id = $event->id;
+           $billtopay->save();
+
         $data = ['data'=>$monitorshifts];
         return $this->showOne($data, 201);
         
 		
 	}
-
-
-    public function payroll(Request $request, $id)
-    {
-        $productionmaster = ProductionMaster::findOrFail($id);
-
-        $event = new Event();// entre produccion se debe hacer una tabla muchos a muchos para el calculo de nomina quicenal estaria asociada a 2 producciones maestra de semana
-        $event->processed = 1;
-        $event->productionmaster_id = $productionmaster->id;
-        $event->observation = 'cerrando nomina';
-        $event->event_type_id = 7;
-        $event->save();
-
-        $payroll = new Payroll();// entre produccion se debe hacer una tabla muchos a muchos para el calculo de nomina quicenal estaria asociada a 2 producciones maestra de semana
-        $payroll->beginning = $request->beginning;
-        $payroll->end = $request->end;
-        $payroll->save();
-       
-        $receiptpayments = $productionmaster->events()
-        //    ->whereHas('productiondetailsdays')
-           ->with('receiptpayment')
-           ->orderBy('id','DESC')
-           ->get()
-        //    ->pluck('monitorshift')
-        //    ->collapse()
-           ->unique()
-           ->values();
-
-           $total = 0;
-
-           foreach($receiptpayments as $receiptpayment){
-                    $receiptpayment->payroll_id = $payroll->id;
-                    $total = $receiptpayment->paycommission;
-                    $receiptpayment->save();
-            }
-
-            $payroll->total = $total;
-            $payroll->save();
-
-            $accounting = new Accounting();
-            $accounting->name = 'nomina';
-            $accounting->payroll_id = $payroll->id;
-            $accounting->company_id = $productionmaster->company_id;
-            $accounting->save();
-
-            $data = ['data'=>$payroll, 'data1'=>$accounting];
-            return $this->showOne($data, 201);
-    }
-
 
     public function awards(Request $request, $id)//importante user_id
     {
@@ -590,17 +590,19 @@ class EventController extends ApiController
 
         $billtopay = new BillToPay();
         $billtopay->description = $request->description;
-        $billtopay->way_to_pay = $request->way_to_pay;
+       // $billtopay->way_to_pay = $request->way_to_pay;
         // $billtopay->transfer_code = $request->transfer_code;
         // $billtopay->quantity = $request->quantity;
-        $billtopay->total_cost = $request->total_cost;
-        $billtopay->total_paid = $request->paid;
+        $billtopay->total_cost = $earning;
+     //   $billtopay->total_paid = $request->paid;
         $billtopay->accounting_id = $accounting->id;
         $billtopay->event_id = $event->id;
         $billtopay->save();
 
         if($request->has('transfer_code')){
             $billtopay->transfer_code = $request->transfer_code;
+            $billtopay->total_paid = $request->paid;
+
         }
 
         if($request->has('quantity')){
@@ -619,8 +621,8 @@ class EventController extends ApiController
 
         $billtocharge = new BillToCharge();
         $billtocharge->description = $request->description;
-        $billtocharge->total_paid = $request->paid;
-        $billtocharge->total_cost = $request->total_cost;
+    //    $billtocharge->total_paid = $request->paid;
+        $billtocharge->total_cost = $earning;
 
         $billtocharge->accounting_id = $accounting->id;
         $billtocharge->event_id = $event->id;
@@ -632,6 +634,16 @@ class EventController extends ApiController
 
         $billtocharge->save();
 
+        
+        $comissionstudy = new ComissionStudy();
+        $comissionstudy->observation = 'Calculo de Ganacia del Estudio';
+        $comissionstudy->production = $productionmaster->dolar_total_week;
+        $comissionstudy->commission = $productionmaster->company->companytype->commission;
+        $comissionstudy->paycommission = $earning;
+        $comissionstudy->event_id = $event->id;
+        $comissionstudy->company_id = $productionmaster->company_id;
+        $comissionstudy->save();
+
         // $data = ['data'=>$productionmaster, 'data1'=>$earning,'data2'=>$billtopay];
         // return $this->showOne($data, 201);
 
@@ -640,7 +652,7 @@ class EventController extends ApiController
     }
 
 
-    public function earningsModels(Request $request, $id)//CUENTA DE COBRO
+    public function earningsModels(Request $request, $id)//CUENTA DE COBRO se hace por carga masiva
     {
         // dd($request->total_paid);
         $productionmaster = ProductionMaster::findOrFail($id);
@@ -723,7 +735,7 @@ class EventController extends ApiController
 
                     if($production->user_id == $user->id){
 
-                       $earning += $production->dolar_total_provider * $user->person->provider->jobtype->value;
+                       $earning += $production->dolar_total_provider * $user->person->provider->jobtype->value; // TODO: verifica que sume todas las conexiones creo que no lo hace (creo que lo confundi con planning provider que ya tiene la sumatoria)
 
                                 $billtopay = new BillToPay();
                                 $billtopay->description = 'calculo de la produccion'.$productionmaster->id;
@@ -756,7 +768,7 @@ class EventController extends ApiController
                                 $billtopay->save();
 
                                         $billtocharge = new BillToCharge();
-                                        $billtocharge->description = 'cuenta de cobro de modelo'.$productionmaster->id;
+                                        $billtocharge->description = 'cuenta de cobro de modelo '.$productionmaster->id;
                                         $billtocharge->production_system = 1;
                                         $billtocharge->total_cost = $earning;
 
@@ -770,11 +782,22 @@ class EventController extends ApiController
 
                                         $billtocharge->save();
 
+                                        $comissionmodel = new ComissionModel();
+                                        $comissionmodel->observation = 'Comision de la modelo de la Produccion Master '.$productionmaster->id;
+                                        $comissionmodel->production = $production->dolar_total_provider;
+                                        $comissionmodel->commission = $user->person->provider->jobtype->value;
+                                        $comissionmodel->paycommission = $earning;
+                                        $comissionmodel->event_id = $event->id;
+                                        $comissionmodel->user_id = $production->user_id;
+                                        $comissionmodel->save();
+
                     }
 
              }
         }
 
+
+       
         
 
         $data = ['data'=>$modelossatelite, 'data1'=>$users , 'data2'=>$productions];
@@ -782,7 +805,23 @@ class EventController extends ApiController
 
     }
 
- 
+    public function binnacle()
+    {
+        $arry = [];
+        $binnacle = fopen(public_path().'/storage/monolog/binnacle.log', "r") or die ("error al leer");
+
+        while(!feof($binnacle)){
+            $linea= fgets($binnacle);
+            $saltodelinea=nl2br($linea);
+            $arry[] = $saltodelinea;
+        }
+        fclose($binnacle);
+
+        $data = ['data'=>$arry];
+        return $this->showOne($data, 201);
+
+
+    }
 
     
 }

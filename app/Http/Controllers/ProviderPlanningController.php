@@ -13,6 +13,16 @@ class ProviderPlanningController extends ApiController
 {
 
 
+    public function __construct()
+    {
+        // $this->middleware('auth:api');
+        // $this->middleware('MonologMiddleware');
+        // $this->middleware('permission:roles.edit');
+        $this->middleware('auth');
+        $this->middleware('roleshinobi:monitor');
+
+    }
+    
     public function index()
     {
         // $breadcrumbs = [
@@ -170,6 +180,11 @@ class ProviderPlanningController extends ApiController
     {
         $providerplanning->delete($providerplanning);
         return $this->showOne($providerplanning);
+    }
+
+    public function listenBroadcast()
+    {
+        return view('/pages/listenBroadcast');
     }
 
 

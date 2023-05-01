@@ -31,6 +31,13 @@ use Illuminate\Http\Request;
 //   });
 
 // });
+
+
+Route::get('binnacle', 'EventController@binnacle')->name('bitacora_sistema');
+
+
+
+
 Route::get('totalevents/{id}', 'UserController@totalEvents')->name('totalevents');
 
 Route::ApiResource('users','UserController');//Elimina los metodos inecesarios para las opi
@@ -38,7 +45,7 @@ Route::post('usersStoreRole/{id}', 'UserController@storeRole')->name('usersStore
 // Route::post('revokeRole/{id}', 'UserController@storeRole')->name('revokeRole');
 
 
-Route::ApiResource('people','PersonController');//Elimina los metodos inecesarios para las opi
+Route::ApiResource('people','PersonController');
             // Route::get('peopleOnly', 'PersonController@onlyperson')->name('OnlyPerson');
 // Route::get('people', 'PersonController@getAll')->name('getAllPeople');
 // Route::post('people', 'PersonController@add')->name('addPerson');
@@ -61,6 +68,9 @@ Provides
  Route::get('providerAccount/{id}', 'ProviderController@providerShowAccount')->name('providerAccount');
 
  Route::ApiResource('providers','ProviderController');
+
+ Route::ApiResource('accountreceiptproviders','AccountReceiptProviderController');
+
 
 //  Route::get('providerEvents', 'ProviderController@providerGetAllEvent')->name('providerEvents');
 
@@ -138,6 +148,9 @@ Route::ApiResource('accountplans','AccountPlanController');//Elimina los metodos
  * company
  */
 
+Route::Resource('companies.accountreceiptproviders','CompanyAccountReceiptProviderController', ['only'=> ['index']]);
+
+
 Route::ApiResource('companies','CompanyController');
 Route::ApiResource('companytypes','CompanyTypeController');
 
@@ -157,7 +170,7 @@ Route::Resource('companies.productionmaster','CompanyProductionMasterController'
 Route::Resource('companies.tasks','CompanyTaskController', ['only'=> ['index','update','destroy']]);
 Route::Resource('companies.boutiques','CompanyBoutiqueController', ['only'=> ['index','update','destroy']]);
 
-Route::Resource('companies.accountproductiondetails','CompanyAccountProductionDetailsController', ['only'=> ['index']]);
+Route::Resource('companies.accountproductiondetails','CompanyAccountProductionDetailsController', ['only'=> ['index','show']]);
 Route::Resource('companies.productiondetailsdays','CompanyProductionDetailsDaysController', ['only'=> ['index']]);
 Route::Resource('companies.productiondetailsshift','CompanyProductionDetailsShiftController', ['only'=> ['index']]);
 Route::Resource('companies.productiondetailsconnec','CompanyProductionDetailsConnecController', ['only'=> ['index']]);
@@ -247,8 +260,8 @@ Route::ApiResource('jobtypes','JobTypeController');
 
 Route::ApiResource('epss','EpsController');
 Route::ApiResource('events','EventController');
-Route::get('showalert/{event}', 'EventController@showAlert');//->name('usersStoreRole');
-Route::get('companyalert/{company}', 'CompanyEventController@companyAlert');//->name('usersStoreRole');
+Route::get('showalert/{event}', 'EventController@showAlert');
+Route::get('companyalert/{company}', 'CompanyEventController@companyAlert');
 
 
 Route::ApiResource('inventories','InventoryController');
@@ -273,9 +286,6 @@ Route::ApiResource('subjects','SubjectController');
 Route::ApiResource('tags','TagController');
 Route::ApiResource('tasks','TaskController');
 Route::ApiResource('trainings','TrainingController');
-
-Route::ApiResource('boutiques','BoutiqueController');
-
 
 Route::ApiResource('typemovementinventories','TypeMovementInventoryController');
 Route::ApiResource('companies.sales','CompanySalesController', ['only'=> ['index']]);
@@ -314,6 +324,8 @@ Route::get('export-list-pdf','BulkLoadController@exportPDF')->name('models.expor
 
 Route::ApiResource('accountreceiptmodels','AccountReceiptModelController');
 
+Route::ApiResource('comissionemployee','ComissionEmployeeController');
+Route::ApiResource('companies.comissionemployee','CompanyComissionEmployeeController', ['only'=> ['index','show']]);
 
 //image*********************************************************************************
 Route::get('images',  [ // TODO: agregar paginacion a las imagenes de provider
@@ -325,7 +337,7 @@ Route::get('images',  [ // TODO: agregar paginacion a las imagenes de provider
 
 
 
-  Route::post('oauth/token', '\Laravel\Passport\Http\Controllers\AccessTokenController@issueToken');
+ // Route::post('oauth/token', '\Laravel\Passport\Http\Controllers\AccessTokenController@issueToken');
 
 
 
@@ -338,122 +350,124 @@ Route::ApiResource('company.totalprovider','Report\CompanyTotalProviderControlle
 //1 
 Route::ApiResource('companies.orderprovider','Report\CompanyOrderProviderController');
 
-
-Route::get('companybestmodel/{company}', 'Report\CompanyOrderProviderController@bestModel');//->name('usersStoreRole');
-Route::get('companyproductionmodel/{company}', 'Report\CompanyOrderProviderController@productionModel');//->name('usersStoreRole');
+Route::get('companybestmodel/{company}', 'Report\CompanyOrderProviderController@bestModel');//
+Route::get('companyproductionmodel/{company}', 'Report\CompanyOrderProviderController@productionModel');//
 
 //5 falta las ganacias
-Route::get('companyproductionstudio/{company}', 'Report\CompanyOrderProviderController@productionStudio');//->name('usersStoreRole');
-Route::get('companyproductionsubstudio/{company}', 'Report\CompanyOrderProviderController@productionSubstudio');//->name('usersStoreRole');
-Route::get('companyproductionsatelite/{company}', 'Report\CompanyOrderProviderController@productionSatelite');//->name('usersStoreRole');
-Route::get('companyproductionsatelitepc/{company}', 'Report\CompanyOrderProviderController@productionSatelitePc');//->name('usersStoreRole');
+Route::get('companyproductionstudio/{company}', 'Report\CompanyOrderProviderController@productionStudio');//g
+Route::get('companyproductionsubstudio/{company}', 'Report\CompanyOrderProviderController@productionSubstudio');//g
+Route::get('companyproductionsatelite/{company}', 'Report\CompanyOrderProviderController@productionSatelite');//g
+Route::get('companyproductionsatelitepc/{company}', 'Report\CompanyOrderProviderController@productionSatelitePc');//g
 
 //5 las ganacias
 
-Route::get('gananciaestudio/{company}', 'Report\CompanyOrderProviderController@gananciaEstudio');//->name('usersStoreRole');
-Route::get('gananciamodelos/{company}', 'Report\CompanyOrderProviderController@gananciaModelos');//->name('usersStoreRole');
+Route::get('gananciaestudio/{company}', 'Report\CompanyOrderProviderController@gananciaEstudio');//g
+Route::get('gananciamodelos/{company}', 'Report\CompanyOrderProviderController@gananciaModelos');//g
 
 // 6
 
-Route::get('pagocomisionesmonitores/{company}', 'Report\CompanyOrderProviderController@pagoComisionesMonitores');//->name('usersStoreRole');
+Route::get('pagocomisionesmonitores/{company}', 'Report\CompanyOrderProviderController@pagoComisionesMonitores');//g
+Route::get('pagocomisionesEstudio/{company}', 'Report\CompanyOrderProviderController@pagoComisionesEstudio');//g
+Route::get('pagocomisionesmodelos/{company}', 'Report\CompanyOrderProviderController@pagoComisionesModelos');//g
 
 // 7
 
-Route::get('contratos1/{id}', 'Report\CompanyOrderProviderController@contratos1');//->name('usersStoreRole');
-Route::get('contratos2/{id}', 'Report\CompanyOrderProviderController@contratos2');//->name('usersStoreRole');
-Route::get('contratos3/{id}', 'Report\CompanyOrderProviderController@contratos3');//->name('usersStoreRole');
-Route::get('contratos4/{id}', 'Report\CompanyOrderProviderController@contratos4');//->name('usersStoreRole');
-Route::get('contratos5/{id}', 'Report\CompanyOrderProviderController@contratos5');//->name('usersStoreRole');
+Route::get('contratos1/{id}', 'Report\CompanyOrderProviderController@contratos1');
+Route::get('contratos2/{id}', 'Report\CompanyOrderProviderController@contratos2');
+Route::get('contratos3/{id}', 'Report\CompanyOrderProviderController@contratos3');
+Route::get('contratos4/{id}', 'Report\CompanyOrderProviderController@contratos4');
+Route::get('contratos5/{id}', 'Report\CompanyOrderProviderController@contratos5');
+Route::get('contratos6/{id}', 'Report\CompanyOrderProviderController@contratos6');
 
-Route::get('removablepayment/{company}', 'Report\CompanyOrderProviderController@removablepayment');//->name('usersStoreRole');
+Route::get('removablepayment/{company}', 'Report\CompanyOrderProviderController@removablepayment');//f
 
 //8
-Route::get('modelosmulta/{company}', 'Report\CompanyOrderProviderController@modelosMulta');//->name('usersStoreRole');
+Route::get('modelosmulta/{company}', 'Report\CompanyOrderProviderController@modelosMulta');//g
 
 //9
-Route::get('modelosmultasin/{company}', 'Report\CompanyOrderProviderController@modelosMultaSin');//->name('usersStoreRole');
+Route::get('modelosmultasin/{company}', 'Report\CompanyOrderProviderController@modelosMultaSin');//
 
-// Route::get('productionestudio/{productionmaster}', 'Report\CompanyOrderProviderController@productionEstudio');//->name('usersStoreRole');
+// Route::get('productionestudio/{productionmaster}', 'Report\CompanyOrderProviderController@productionEstudio');
 
 // productionsatelite
 // Route::post('usersStoreRole/{id}', 'UserController@storeRole')->name('usersStoreRole');
 
 
 //11
-Route::get('productividadmonitores/{company}', 'Report\CompanyOrderProviderController@productividadMonitores');//->name('usersStoreRole');
+Route::get('productividadmonitores/{company}', 'Report\CompanyOrderProviderController@productividadMonitores');//g
 
 //12
-Route::get('productionnuevas/{company}', 'Report\CompanyOrderProviderController@productionNuevas');//->name('usersStoreRole');
+Route::get('productionnuevas/{company}', 'Report\CompanyOrderProviderController@productionNuevas');//
 
 //13
-Route::get('turnodiario/{company}', 'Report\CompanyOrderProviderController@turnoDiario');//->name('usersStoreRole');
+Route::get('turnodiario/{company}', 'Report\CompanyOrderProviderController@turnoDiario');//
 
 //14
-Route::get('mejormonitoresproduc/{company}', 'Report\CompanyOrderProviderController@mejorMonitoresProduc');//->name('usersStoreRole');
+Route::get('mejormonitoresproduc/{company}', 'Report\CompanyOrderProviderController@mejorMonitoresProduc');//
 
 //15
-Route::get('modelosplantasatelites/{company}', 'Report\CompanyOrderProviderController@modelosPlantaSatelites');//->name('usersStoreRole');
+Route::get('modelosplantasatelites/{company}', 'Report\CompanyOrderProviderController@modelosPlantaSatelites');//
 
 //16
-Route::get('reportestockminimo/{company}', 'Report\CompanyOrderProviderController@reporteStockminimo');//->name('usersStoreRole');
+Route::get('reportestockminimo/{company}', 'Report\CompanyOrderProviderController@reporteStockminimo');//
 
 //18
-Route::get('numeroempleados/{company}', 'Report\CompanyOrderProviderController@numeroEmpleados');//->name('usersStoreRole');
+Route::get('numeroempleados/{company}', 'Report\CompanyOrderProviderController@numeroEmpleados');//
 
 //19
-Route::get('monitorroom/{company}', 'Report\CompanyOrderProviderController@monitorRoom');//->name('usersStoreRole');
+Route::get('monitorroom/{company}', 'Report\CompanyOrderProviderController@monitorRoom');//
 
 //21
-Route::get('modelosnuevas/{company}', 'Report\CompanyOrderProviderController@modelosNuevas');//->name('usersStoreRole');
+Route::get('modelosnuevas/{company}', 'Report\CompanyOrderProviderController@modelosNuevas');//
 
 //22
-Route::get('activaroninactivaron/{company}', 'Report\CompanyOrderProviderController@activaronInactivaron');//->name('usersStoreRole');
+Route::get('activaroninactivaron/{company}', 'Report\CompanyOrderProviderController@activaronInactivaron');//
 
 //23
-Route::get('agendaronaudiovisuales/{company}', 'Report\CompanyOrderProviderController@agendaronAudiovisuales');//->name('usersStoreRole');
+Route::get('agendaronaudiovisuales/{company}', 'Report\CompanyOrderProviderController@agendaronAudiovisuales');//
 
 //24
-Route::get('modelostarde/{company}', 'Report\CompanyOrderProviderController@modelosTarde');//->name('usersStoreRole');
+Route::get('modelostarde/{company}', 'Report\CompanyOrderProviderController@modelosTarde');//
 
 //25
-Route::get('roomsemana/{company}', 'Report\CompanyOrderProviderController@roomSemana');//->name('usersStoreRole');
+Route::get('roomsemana/{company}', 'Report\CompanyOrderProviderController@roomSemana');//////
 
 //26
-Route::get('cuantoslockers/{company}', 'Report\CompanyOrderProviderController@cuantosLockers');//->name('usersStoreRole');
+Route::get('cuantoslockers/{company}', 'Report\CompanyOrderProviderController@cuantosLockers');//
 
 //27
-Route::get('reportedano/{company}', 'Report\CompanyOrderProviderController@reporteDano');//->name('usersStoreRole');
+Route::get('reportedano/{company}', 'Report\CompanyOrderProviderController@reporteDano');//
 
 //28
-Route::get('reporteinventario/{company}', 'Report\CompanyOrderProviderController@reporteInventario');//->name('usersStoreRole');
+Route::get('reporteinventario/{company}', 'Report\CompanyOrderProviderController@reporteInventario');//
 
 //29 premiosUser
-Route::get('premiosuser/{company}', 'Report\CompanyOrderProviderController@premiosUser');//->name('usersStoreRole');
+Route::get('premiosuser/{company}', 'Report\CompanyOrderProviderController@premiosUser');//
 
 //30
-Route::get('modelospermisos/{company}', 'Report\CompanyOrderProviderController@modelosPermisos');//->name('usersStoreRole');
+Route::get('modelospermisos/{company}', 'Report\CompanyOrderProviderController@modelosPermisos');//
 
 //32
-Route::get('reportetrm/{company}', 'Report\CompanyOrderProviderController@reporteTRM');//->name('usersStoreRole');
+Route::get('reportetrm/{company}', 'Report\CompanyOrderProviderController@reporteTRM');//g
 
 //33
-Route::get('reporteaudiovisuales/{company}', 'Report\CompanyOrderProviderController@reporteAudiovisuales');//->name('usersStoreRole');
+Route::get('reporteaudiovisuales/{company}', 'Report\CompanyOrderProviderController@reporteAudiovisuales');//
 
 //34
-Route::get('reporteantiguedad/{company}', 'Report\CompanyOrderProviderController@reporteAntiguedad');//->name('usersStoreRole');
+Route::get('reporteantiguedad/{company}', 'Report\CompanyOrderProviderController@reporteAntiguedad');
 
 
 
 /**
- * Nomina
+ * comisiones y nomina
  */
 
 // Route::get('paycommission/{id}', 'EventController@payCommission');//->name('usersStoreRole');
-Route::post('closeplanning/{id}', 'EventController@closePlanning');//->name('usersStoreRole');
-Route::post('commissioncalculation90/{id}', 'EventController@commissionCalculation90');//->name('usersStoreRole');
-Route::post('commissioncalculation10/{id}', 'EventController@commissionCalculation10');//->name('usersStoreRole');
-Route::post('commission15/{id}', 'EventController@commission15');//->name('usersStoreRole');
-Route::post('payroll/{id}', 'PayrollController@payroll');//->name('usersStoreRole');
+Route::post('closeplanning/{id}', 'EventController@closePlanning');
+Route::post('commissioncalculation90/{id}', 'EventController@commissionCalculation90');
+Route::post('commissioncalculation10/{id}', 'EventController@commissionCalculation10');
+Route::post('commission15/{id}', 'EventController@commission15');
+Route::get('payroll/{id}', 'PayrollController@payroll');
 
 
 
@@ -461,9 +475,9 @@ Route::post('payroll/{id}', 'PayrollController@payroll');//->name('usersStoreRol
  * cuenta por pagar y premio
  */
 
-Route::post('awards/{id}', 'EventController@awards');//->name('usersStoreRole');
-Route::post('earningsstudies/{id}', 'EventController@earningsStudies');//->name('usersStoreRole');
-Route::post('earningsmodels/{id}', 'EventController@earningsModels');//->name('usersStoreRole');
+Route::post('awards/{id}', 'EventController@awards');
+Route::post('earningsstudies/{id}', 'EventController@earningsStudies');
+Route::post('earningsmodels/{id}', 'EventController@earningsModels');
 
 // earningsStudies
 
@@ -479,3 +493,37 @@ Route::post('notify/marknotificationsread', 'NotificationController@markNotifica
 // Route::get('notify/broadcastnotifications', 'NotificationController@broadcastNotifications');
 Route::post('notify/destroy', 'NotificationController@destroy');
 Route::post('notify/show', 'NotificationController@show');
+
+
+//Graph Dashboard Modelo
+Route::get('sitemodels/{company}', 'GraphCompanyController@siteModels');
+Route::get('sitemodelsmonth/{company}', 'GraphCompanyController@siteModelsMonth');
+Route::get('countsitemodels/{company}', 'GraphCompanyController@countSiteModels');
+
+//Graph Dashboard Monitor
+Route::get('weekmonitor/{company}', 'GraphCompanyController@weekMonitor');
+Route::get('commissionmonth/{company}', 'GraphCompanyController@commissionMonth');
+Route::get('statusproduction/{company}', 'GraphCompanyController@statusProduction');
+
+//Graph Dashboard 
+
+Route::get('newmodelbiannual/{company}', 'GraphCompanyController@newModelBiannual');
+Route::get('salesbiannual/{company}', 'GraphCompanyController@salesBiannual');
+Route::get('productionbiannual/{company}', 'GraphCompanyController@productionBiannual');
+Route::get('eventdetails/{company}', 'GraphCompanyController@eventDetails');
+Route::get('productionmonth/{company}', 'GraphCompanyController@productionMonth');
+
+Route::get('statusproductiondashboard/{company}', 'GraphCompanyController@statusProductionDashboard');
+
+
+// contratos
+Route::ApiResource('contracts','ContractController');
+Route::post('contractupdateimage/{contract}', 'ContractController@updateImage');
+Route::Resource('companies.contracts','CompanyContractController', ['only'=> ['index']]);
+
+
+/**
+ * Encuestas
+ */
+Route::ApiResource('polls','PollController');
+Route::ApiResource('companies.polls','CompanyPollController', ['only'=> ['index']]);

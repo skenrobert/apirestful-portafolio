@@ -10,6 +10,13 @@ use App\Models\Shop;
 
 class CompanyController extends ApiController
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('MonologMiddleware');
+
+    }
+    
  
     public function index()
     {

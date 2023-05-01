@@ -9,6 +9,13 @@ use Illuminate\Http\Request;
 
 class CompanyBillToChargeController extends ApiController
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('MonologMiddleware');
+
+    }
+    
     public function index(Company $company)
     {
         $billtocharge = $company->accounting()

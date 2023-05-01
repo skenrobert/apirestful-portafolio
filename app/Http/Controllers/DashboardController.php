@@ -16,25 +16,25 @@ class DashboardController extends Controller
             'pageConfigs' => $pageConfigs
         ]);
     }
-    // Dashboard Model - GPS/APP
-    public function dashboard_model(){
-        $pageConfigs = [
-            'pageHeader' => false
-        ];
+    // // Dashboard Model - GPS/APP
+    // public function dashboard_model(){
+    //     $pageConfigs = [
+    //         'pageHeader' => false
+    //     ];
 
-        return view('/pages/dashboard-model', [
-            'pageConfigs' => $pageConfigs
-        ]);
-    }
-    // Dashboard Monitor - GPS/APP
-    public function dashboard_monitor(){
-        $pageConfigs = [
-            'pageHeader' => false
-        ];
+    //     return view('/pages/dashboard-model', [
+    //         'pageConfigs' => $pageConfigs
+    //     ]);
+    // }
+    // // Dashboard Monitor - GPS/APP
+    // public function dashboard_monitor(){
+    //     $pageConfigs = [
+    //         'pageHeader' => false
+    //     ];
 
-        return view('/pages/dashboard-monitor', [
-            'pageConfigs' => $pageConfigs
-        ]);
-    }
+    //     return view('/pages/dashboard-monitor', [
+    //         'pageConfigs' => $pageConfigs
+    //     ]);
+    // }
 }
 

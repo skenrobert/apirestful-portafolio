@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Laravel\Passport\HasApiTokens;
 
+use App\Events\EventCreated; 
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -31,6 +33,10 @@ class User extends Authenticatable
         ];
     }
 
+    protected $dispatchesEvents = [
+        'created' => EventCreated::class,
+        'updated' => EventUpdated::class
+    ];
 
     protected $dates = ['deleted_at'];
 
@@ -72,7 +78,17 @@ class User extends Authenticatable
 
 
     /*****************  Relationships  *****************/
+
+    public function polls()// 1 a 1
+    {
+      return $this->hasMany('App\Models\Poll');
+    }
     
+    public function contract()// 1 a 1
+    {
+      return $this->hasMany('App\Models\Contract');
+    }
+
     public function person(){
         return $this->belongsTo('App\Models\Person');
     }
@@ -81,7 +97,7 @@ class User extends Authenticatable
         return $this->belongsTo('App\Models\Company');
     }
 
-    public function monitorshift(){
+    public function monitor_shifts(){
         return $this->hasMany('App\Models\MonitorShift');
     }
 
@@ -104,6 +120,18 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\Models\ReceiptPayment');
     }
+
+    public function comissionemployees()//1 a m
+    {
+        return $this->hasMany('App\Models\ComissionEmployee');
+    }
+
+    
+    public function comissionmodels()//1 a m
+    {
+        return $this->hasMany('App\Models\ComissionModel');
+    }
+
       /*****************  Relationships  shinobi *****************/
     
       public function roles()//m a m
@@ -305,4 +333,13 @@ class User extends Authenticatable
       {
            return $this->belongsToMany('App\Models\Image')->withTimestamps();
       }
+
+
+      //
+          
+    public function totalEvents($user_id) {
+
+        $events = Event::select('id','title')->orderBy('id','DESC')->whereIn('event_type_id',[1,2,3,4])->where('user_id','=',$user_id)->where('read_at','=',null)->get();
+        return $events;
+    }
 }

@@ -48,14 +48,14 @@ $factory->define(Person::class, function (Generator $faker) {
       'name'=>$faker->name,
       'last_name'=>$faker->lastName,
       'birthdate'=>$faker->date($format = 'Y-m-d', $max = 'now'),
-      //'gender'=>$faker->randomElement($array = array (0,1,2,3)), // 0 = Mujer | 1 = Pareja | 2 = Hombre | 3 = Trans
+      'gender'=>$faker->randomElement($array = array ('Mujer','Pareja','Hombre','Trans')), 
       'address'=>$faker->address,
       'phone'=>$faker->phoneNumber,
       'mobile_phone'=>$faker->phoneNumber,
       'nationality'=>$faker->randomElement($array = array (0,1)), // 0 = Colombiana | 1 = Extranjero
       'bank_account'=>$faker->uuid,
-      //'epss_id'=>1,
-      //'banks_id'=>1,
+      // 'epss_id'=>1,
+      'banks_id'=>1,
       'slug'=>'name',
 
     ];

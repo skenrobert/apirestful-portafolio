@@ -14,18 +14,24 @@ class ReceiptPayment extends Model
     protected $dates = ['deleted_at'];
 
     protected $fillable = [
-        'observation',
+      
+        'name',
+        'document_number',
+        'worked_days',
         'pay_salary',
-        'event_id',
-        'user_id',
+        'pay_transport_aid',
+        'pay_additional_transport',
+        'pay_food_aid',
+        'health',
+        'pension',
+        'total_income',
+        'total_discounts',
+        'total_pay',
+        'number_receipt',
         'payroll_id',
-        'paycommission',
-        'commission',
-        'production',
-        'ret_fte',
-        'value_collect',
-        'value_pay',
-        'number_receipt'
+        'event_id',
+        'user_id'
+
     ];
 
 

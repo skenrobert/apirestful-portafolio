@@ -11,10 +11,12 @@ use Caffeinated\Shinobi\Models\Permission;
 
 class RoleController extends ApiController{
     
-    // public function __construct()//TODO:para saber probar deshabilite este middleware
-    // {
-    //     $this->middleware('auth');
-    // }
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('MonologMiddleware');
+
+    }
 
     public function index()
     {

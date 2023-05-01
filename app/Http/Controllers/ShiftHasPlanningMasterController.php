@@ -7,6 +7,13 @@ use Illuminate\Http\Request;
 
 class ShiftHasPlanningMasterController extends ApiController
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('MonologMiddleware');
+
+    }
+    
     public function index(Request $request,ShiftHasPlanning $shifthasplanning)
     {
         // dd($request->id);

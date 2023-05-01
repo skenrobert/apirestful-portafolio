@@ -19,6 +19,9 @@ class JobType extends Model
     'description',
     'value_models',
     'satelite',
+    'transport_aid',
+    'food_aid',
+    'additional_transport_assistance'
     // 'company_id'
     
   ];

@@ -3,10 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payroll;
+use App\Models\ProductionMaster;
+use App\Models\ReceiptPayment;
+use App\Models\Company;
+use App\Models\Accounting;
+use App\Models\Event;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade as PDF;
+
 
 class PayrollController extends ApiController
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('MonologMiddleware');
+
+    }
+    
     public function index()
     {
        //listar por el imventario
@@ -20,21 +35,21 @@ class PayrollController extends ApiController
         // return $this->showAll($data);
     }
 
-    public function store(Request $request)
-    {
-        $Payroll = Payroll::create($request->all());
+    // public function store(Request $request)
+    // {
+    //     $Payroll = Payroll::create($request->all());
 
-        // if($request->has('company_id')){
-        //     $Payroll->company_id = $request->company_id;
-        // }
+    //     // if($request->has('company_id')){
+    //     //     $Payroll->company_id = $request->company_id;
+    //     // }
         
-        // $Payroll->save();
-        // $Payroll->taxes()->syncwithoutdetaching($request->tax_id);
-        // $Payroll->taxes;
+    //     // $Payroll->save();
+    //     // $Payroll->taxes()->syncwithoutdetaching($request->tax_id);
+    //     // $Payroll->taxes;
 
-        return $this->showOne($Payroll, 201);
+    //     return $this->showOne($Payroll, 201);
 
-    }
+    // }
 
     public function show(Payroll $Payroll)
     {
@@ -79,69 +94,102 @@ class PayrollController extends ApiController
         // return $this->showAll($Payroll);
     }
 
+    
     public function payroll(Request $request, $id)
     {
+        $company = Company::find($id);
         
-        $productionmaster = ProductionMaster::findOrFail($id);
-        $productionmaster->closed = 1;//cierra la planificacion tambien
-        $productionmaster->save();
-
-        $event = new Event();
+        $event = new Event();// entre produccion se debe hacer una tabla muchos a muchos para el calculo de nomina quicenal estaria asociada a 2 producciones maestra de semana
         $event->processed = 1;
-        // $event->productionmaster_id = $productionmaster->id;
+        $event->company_id = $company->id;
         $event->observation = 'calculo de nomina';
-        $event->event_type_id = 6;// debe ser 5
+        $event->event_type_id = 7;
         $event->save();
 
-        //genero un evento ahora o genero la nomina
-        
-        // $payroll = new Payroll();// la nomina debe ser calculada 2 veces al mes
-        // $payroll->status = 'Ejecutada';
-        // $payroll->save();
+        $payroll = new Payroll();// entre produccion se debe hacer una tabla muchos a muchos para el calculo de nomina quicenal estaria asociada a 2 producciones maestra de semana
+        $payroll->beginning = $request->beginning;
+        $payroll->end = $request->end;
+        $payroll->company_id = $company->id;
+        $payroll->save();
+       
 
-        $commission = Commission::firstOrFail();
-        // if($request->has('commission_id')){
-            // $event = Event::create($request->all());
-            // $event->commission_id = $commission->commission_id;
-            // $event->save();
-        // }
-
-        //debo crear una nomina y luego con esos 2 id crear el recibo de pago
-
-        $payroll = new Payroll();
-        // $productionmaster->company_id = $request->company_id;//$company->id;
-        // $productionmaster->shift_has_planning_id = $shifthasplanning->id;
-        // $productionmaster->commission_id = $commission->id;//$company->id;
-        // $productionmaster->save();
-
-        $receiptpayment = new ReceiptPayment();
-
-        foreach($monitorshift->planningprovider as $planningprovider){
-
-            if($planningprovider->goal_dollar == $planningprovider->production_total_dollar){
-                dd($planningprovider);
-                dd('meta es igual');
+        $employees = $company->people()
+        ->whereHas('employee')
+        ->with('employee.jobtype')
+        ->with('user')
+        ->orderBy('id','DESC')
+        ->get()
+        ->where('user.status','=','true')
+        // ->pluck('employee')
+        ->unique()
+        ->values();
 
 
-            }else if($planningprovider->goal_dollar >= $planningprovider->production_total_dollar){
+        // $data = ['data'=>$employees];
+        // return $this->showOne($data, 201);
 
-                dd('meta es mayor');
+        $fecha = Carbon::createFromFormat('Y-m-d', $payroll->beginning);
+        $fechaFin = Carbon::createFromFormat('Y-m-d', $payroll->end);
+        $worked_days = $fecha->diffInDays($fechaFin);
 
-                $payroll = new Payroll();
+        // dd($worked_days);
+        foreach($employees as $employee){
 
+            // dd($employee->name . ' ' . $employee->last_name);
+            // dd($employee->user->id);
+            $company->number_receipt = $company->number_receipt + 1;
+            $company->save();
 
-            }else if($planningprovider->goal_dollar <= $planningprovider->production_total_dollar){
-                dd($planningprovider);
+            $receiptpayment = new ReceiptPayment();// entre produccion se debe hacer una tabla muchos a muchos para el calculo de nomina quicenal estaria asociada a 2 producciones maestra de semana
+            $receiptpayment->name = $employee->name . ' ' . $employee->last_name;
+            $receiptpayment->document_number = $employee->document_number;
+            $receiptpayment->worked_days = $worked_days;
+            $receiptpayment->pay_salary = $employee->employee->jobtype->salary;
+            $receiptpayment->pay_transport_aid = $employee->employee->jobtype->transport_aid;
+            $receiptpayment->pay_additional_transport = $employee->employee->jobtype->food_aid;
+            $receiptpayment->pay_food_aid = $employee->employee->jobtype->additional_transport_assistance;
+            $receiptpayment->health = $employee->employee->jobtype->salary * 0.04;
+            $receiptpayment->pension = $employee->employee->jobtype->salary * 0.04;
+            $receiptpayment->total_income = $employee->employee->jobtype->salary + $employee->employee->jobtype->transport_aid + $employee->employee->jobtype->food_aid + $employee->employee->jobtype->additional_transport_assistance;
+            $receiptpayment->total_discounts = $employee->employee->jobtype->salary * 0.04 + $employee->employee->jobtype->salary * 0.04;
+            $receiptpayment->save();
 
-                dd('meta es menor');
-
-                $payroll = new Payroll();
-
-
-            }
-
-
-        }
+            $receiptpayment->total_pay = $receiptpayment->total_income - $receiptpayment->total_discounts;
+            $receiptpayment->number_receipt = $company->number_receipt;
+            $receiptpayment->payroll_id = $payroll->id;
+            $receiptpayment->event_id = $event->id;
+            $receiptpayment->user_id = $employee->user->id;
+            $receiptpayment->save();
 
     }
+       
+            $accounting = new Accounting();
+            $accounting->name = 'nomina';
+            $accounting->payroll_id = $payroll->id;
+            $accounting->company_id = $company->id;
+            $accounting->save();
+
+
+
+            // $data = ['data'=>$payroll, 'data1'=>$accounting];
+            // return $this->showOne($data, 201);
+
+            $meses = array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+            $fecha = Carbon::createFromFormat('Y-m-d', $payroll->beginning);
+            $fechaFin = Carbon::createFromFormat('Y-m-d', $payroll->end);
+            $mes = $meses[($fecha->format('n')) - 1];
+    
+            // dd($mes);
+            $periodo =  $mes .' '. $fecha->format('d') . ' AL ' . $fechaFin->format('d');
+
+            $receiptpayments = ReceiptPayment::where('payroll_id','=',$payroll->id)->get();
+
+        //      $data = ['data'=>$receiptpayments];
+        // return $this->showOne($data, 201);
+
+            $pdf = PDF::loadView('pdf.removablepaymentAll', compact('receiptpayments', 'periodo'));
+
+            return $pdf->download('recibo-pagos.pdf');
+    }
+
 }
